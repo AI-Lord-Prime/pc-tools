@@ -1,4 +1,25 @@
-[features]
-default = ["custom-protocol"]
-custom-protocol = ["tauri/custom-protocol"]
-admin-manifest = []  # 新增
+# 常用运行指令
+
+## 开发启动（前端 + Tauri 桌面端）
+
+```bash
+npm run dev
+```
+
+## 纯前端开发（不启动 Tauri 窗口）
+
+```bash
+npm run vite
+```
+
+## 构建生产包
+
+```bash
+npm run build
+npm run tauri build
+```
+
+## 其他
+
+- `npm run preview`：预览生产构建
+- `npm run tauri -- <命令>`：执行任意 Tauri CLI 命令

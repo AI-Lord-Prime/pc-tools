@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [svelte()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
