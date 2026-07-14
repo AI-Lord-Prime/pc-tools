@@ -138,8 +138,24 @@ pub fn get_cpu_usage(state: State<'_, SystemInfoManager>) -> Result<CpuUsage, St
 
 // ==================== GPU 相关命令 ====================
 
+/// 过滤虚拟显卡驱动，只保留真实物理 GPU
+fn is_real_gpu(name: &str) -> bool {
+    let virtual_keywords = [
+        "Microsoft",      // Microsoft Basic Display Adapter 等
+        "OrayIddDriver",  // 向日葵远程控制虚拟显示
+        "Idd",            // Indirect Display Driver 虚拟显示
+        "Virtual",        // 虚拟显卡
+        "RDD",            // Remote Display Driver
+        "Splashtop",      // Splashtop 远程虚拟显示
+        "Parsec",         // Parsec 虚拟显示
+        "DDRAW",          // 虚拟显示
+        "Mirage",         // Mirage 虚拟显示驱动
+    ];
+    !virtual_keywords.iter().any(|kw| name.contains(kw))
+}
+
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_VideoController", rename_all = "PascalCase")]
 struct Win32VideoController {
     name: Option<String>,
     adapter_ram: Option<u64>,
@@ -162,31 +178,27 @@ pub fn get_gpu_info() -> Result<GpuInfo, String> {
 }
 
 fn get_gpu_info_internal() -> Result<GpuInfo, String> {
-    // 先尝试 WMI，失败则 fallback 到 sysinfo
-    if let Ok(wmi) = get_wmi_connection() {
-        if let Ok(controllers) = wmi.query::<Win32VideoController>() {
-            if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
-                let memory = controller.adapter_ram.unwrap_or(0);
-                return Ok(GpuInfo {
-                    name: controller.name.unwrap_or_else(|| "Unknown".to_string()),
-                    memory: format_bytes(memory),
-                    temperature: 0.0,
-                });
-            }
-        }
+    let wmi = get_wmi_connection()?;
+    
+    let controllers: Vec<Win32VideoController> = wmi.query().map_err(|e| {
+        eprintln!("WMI GPU query failed: {}", e);
+        e.to_string()
+    })?;
+    
+    if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| is_real_gpu(n))).next() {
+        let memory = controller.adapter_ram.unwrap_or(0);
+        Ok(GpuInfo {
+            name: controller.name.unwrap_or_else(|| "Unknown".to_string()),
+            memory: format_bytes(memory),
+            temperature: 0.0,
+        })
+    } else {
+        Ok(GpuInfo {
+            name: "未检测到".to_string(),
+            memory: "N/A".to_string(),
+            temperature: 0.0,
+        })
     }
-    
-    // WMI 失败，使用 sysinfo fallback
-    let sys = System::new_all();
-    let gpu_name = sys.gpus().first()
-        .map(|g| g.name().to_string())
-        .unwrap_or_else(|| "未检测到".to_string());
-    
-    Ok(GpuInfo {
-        name: gpu_name,
-        memory: "N/A".to_string(),
-        temperature: 0.0,
-    })
 }
 
 #[tauri::command]
@@ -212,45 +224,41 @@ pub fn get_gpu_detailed_info() -> Result<GpuDetailedInfo, String> {
 }
 
 fn get_gpu_detailed_info_internal() -> Result<GpuDetailedInfo, String> {
-    // 先尝试 WMI，失败则 fallback 到 sysinfo
-    if let Ok(wmi) = get_wmi_connection() {
-        if let Ok(controllers) = wmi.query::<Win32VideoController>() {
-            if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
-                let memory = controller.adapter_ram.unwrap_or(0);
-                return Ok(GpuDetailedInfo {
-                    name: controller.name.clone().unwrap_or_else(|| "Unknown".to_string()),
-                    vendor: "N/A".to_string(),
-                    memory: format_bytes(memory),
-                    memory_type: "N/A".to_string(),
-                    driver_version: controller.driver_version.clone().unwrap_or_else(|| "N/A".to_string()),
-                    core_frequency: "N/A".to_string(),
-                    memory_frequency: "N/A".to_string(),
-                    temperature: 0.0,
-                    usage: 0.0,
-                    memory_usage: 0.0,
-                });
-            }
-        }
+    let wmi = get_wmi_connection()?;
+    
+    let controllers: Vec<Win32VideoController> = wmi.query().map_err(|e| {
+        eprintln!("WMI GPU detailed query failed: {}", e);
+        e.to_string()
+    })?;
+    
+    if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| is_real_gpu(n))).next() {
+        let memory = controller.adapter_ram.unwrap_or(0);
+        Ok(GpuDetailedInfo {
+            name: controller.name.clone().unwrap_or_else(|| "Unknown".to_string()),
+            vendor: "N/A".to_string(),
+            memory: format_bytes(memory),
+            memory_type: "N/A".to_string(),
+            driver_version: controller.driver_version.clone().unwrap_or_else(|| "N/A".to_string()),
+            core_frequency: "N/A".to_string(),
+            memory_frequency: "N/A".to_string(),
+            temperature: 0.0,
+            usage: 0.0,
+            memory_usage: 0.0,
+        })
+    } else {
+        Ok(GpuDetailedInfo {
+            name: "未检测到".to_string(),
+            vendor: "N/A".to_string(),
+            memory: "N/A".to_string(),
+            memory_type: "N/A".to_string(),
+            driver_version: "N/A".to_string(),
+            core_frequency: "N/A".to_string(),
+            memory_frequency: "N/A".to_string(),
+            temperature: 0.0,
+            usage: 0.0,
+            memory_usage: 0.0,
+        })
     }
-    
-    // WMI 失败，使用 sysinfo fallback
-    let sys = System::new_all();
-    let gpu_name = sys.gpus().first()
-        .map(|g| g.name().to_string())
-        .unwrap_or_else(|| "未检测到".to_string());
-    
-    Ok(GpuDetailedInfo {
-        name: gpu_name,
-        vendor: "N/A".to_string(),
-        memory: "N/A".to_string(),
-        memory_type: "N/A".to_string(),
-        driver_version: "N/A".to_string(),
-        core_frequency: "N/A".to_string(),
-        memory_frequency: "N/A".to_string(),
-        temperature: 0.0,
-        usage: 0.0,
-        memory_usage: 0.0,
-    })
 }
 
 #[tauri::command]
@@ -309,7 +317,7 @@ pub fn get_memory_detailed_info(state: State<'_, SystemInfoManager>) -> Result<M
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_PhysicalMemoryArray", rename_all = "PascalCase")]
 struct Win32PhysicalMemoryArray {
     memory_devices: Option<u32>,
 }
@@ -346,7 +354,7 @@ fn get_memory_details_from_wmi() -> Result<(String, String, u32, u32), String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_PhysicalMemory", rename_all = "PascalCase")]
 struct Win32PhysicalMemory {
     bank_label: Option<String>,
     manufacturer: Option<String>,
@@ -545,7 +553,7 @@ fn get_disk_list_internal() -> Result<Vec<DiskItem>, String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_DiskDrive", rename_all = "PascalCase")]
 struct Win32DiskDrive {
     device_id: String,
     model: String,
@@ -553,7 +561,7 @@ struct Win32DiskDrive {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_LogicalDisk", rename_all = "PascalCase")]
 struct Win32LogicalDisk {
     device_id: String,
     filesystem: Option<String>,
@@ -592,7 +600,7 @@ pub fn get_system_info(state: State<'_, SystemInfoManager>) -> Result<SystemInfo
 // ==================== 主板信息命令 ====================
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_BaseBoard", rename_all = "PascalCase")]
 struct Win32BaseBoard {
     product: Option<String>,
     manufacturer: Option<String>,
@@ -600,7 +608,7 @@ struct Win32BaseBoard {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_BIOS", rename_all = "PascalCase")]
 struct Win32Bios {
     manufacturer: Option<String>,
     version: Option<String>,
@@ -609,7 +617,7 @@ struct Win32Bios {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_ComputerSystemProduct", rename_all = "PascalCase")]
 struct Win32ComputerSystemProduct {
     name: Option<String>,
     vendor: Option<String>,
@@ -693,7 +701,7 @@ fn get_bios_info_internal() -> Result<BiosInfo, String> {
 // ==================== 监控相关命令 ====================
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "MSAcpi_ThermalZoneTemperature", rename_all = "PascalCase")]
 struct MSAcpiThermalZoneTemperature {
     current_temperature: Option<i32>,
 }
@@ -711,7 +719,7 @@ fn get_cpu_temperature_from_wmi() -> Result<f32, String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_Fan", rename_all = "PascalCase")]
 struct Win32Fan {
     name: Option<String>,
     current_speed: Option<u32>,
@@ -764,7 +772,7 @@ fn get_temperatures_internal() -> Result<Temperatures, String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_NetworkAdapterConfiguration", rename_all = "PascalCase")]
 struct Win32NetworkAdapterConfiguration {
     ip_address: Option<Vec<String>>,
     ip_subnet: Option<Vec<String>>,
@@ -775,7 +783,7 @@ struct Win32NetworkAdapterConfiguration {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_PerfRawData_Tcpip_NetworkInterface", rename_all = "PascalCase")]
 struct Win32PerfRawDataTcpipNetworkInterface {
     bytes_received_per_sec: Option<u64>,
     bytes_sent_per_sec: Option<u64>,
@@ -1095,7 +1103,7 @@ pub fn scan_all() -> Result<ScanResultResponse, String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_StartupCommand", rename_all = "PascalCase")]
 struct Win32StartupCommand {
     name: Option<String>,
     command: Option<String>,
@@ -1161,7 +1169,7 @@ pub fn delete_startup(name: String) -> Result<(), String> {
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename = "Win32_PnPSignedDriver", rename_all = "PascalCase")]
 struct Win32PnPSignedDriver {
     device_name: Option<String>,
     driver_version: Option<String>,
