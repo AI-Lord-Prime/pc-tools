@@ -162,27 +162,31 @@ pub fn get_gpu_info() -> Result<GpuInfo, String> {
 }
 
 fn get_gpu_info_internal() -> Result<GpuInfo, String> {
-    let wmi = get_wmi_connection()?;
-    
-    let controllers: Vec<Win32VideoController> = wmi.query().map_err(|e| {
-        eprintln!("WMI GPU query failed: {}", e);
-        e.to_string()
-    })?;
-    
-    if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
-        let memory = controller.adapter_ram.unwrap_or(0);
-        Ok(GpuInfo {
-            name: controller.name.unwrap_or_else(|| "Unknown".to_string()),
-            memory: format_bytes(memory),
-            temperature: 0.0,
-        })
-    } else {
-        Ok(GpuInfo {
-            name: "未检测到".to_string(),
-            memory: "N/A".to_string(),
-            temperature: 0.0,
-        })
+    // 先尝试 WMI，失败则 fallback 到 sysinfo
+    if let Ok(wmi) = get_wmi_connection() {
+        if let Ok(controllers) = wmi.query::<Win32VideoController>() {
+            if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
+                let memory = controller.adapter_ram.unwrap_or(0);
+                return Ok(GpuInfo {
+                    name: controller.name.unwrap_or_else(|| "Unknown".to_string()),
+                    memory: format_bytes(memory),
+                    temperature: 0.0,
+                });
+            }
+        }
     }
+    
+    // WMI 失败，使用 sysinfo fallback
+    let sys = System::new_all();
+    let gpu_name = sys.gpus().first()
+        .map(|g| g.name().to_string())
+        .unwrap_or_else(|| "未检测到".to_string());
+    
+    Ok(GpuInfo {
+        name: gpu_name,
+        memory: "N/A".to_string(),
+        temperature: 0.0,
+    })
 }
 
 #[tauri::command]
@@ -208,41 +212,45 @@ pub fn get_gpu_detailed_info() -> Result<GpuDetailedInfo, String> {
 }
 
 fn get_gpu_detailed_info_internal() -> Result<GpuDetailedInfo, String> {
-    let wmi = get_wmi_connection()?;
-    
-    let controllers: Vec<Win32VideoController> = wmi.query().map_err(|e| {
-        eprintln!("WMI GPU detailed query failed: {}", e);
-        e.to_string()
-    })?;
-    
-    if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
-        let memory = controller.adapter_ram.unwrap_or(0);
-        Ok(GpuDetailedInfo {
-            name: controller.name.clone().unwrap_or_else(|| "Unknown".to_string()),
-            vendor: "N/A".to_string(),
-            memory: format_bytes(memory),
-            memory_type: "N/A".to_string(),
-            driver_version: controller.driver_version.clone().unwrap_or_else(|| "N/A".to_string()),
-            core_frequency: "N/A".to_string(),
-            memory_frequency: "N/A".to_string(),
-            temperature: 0.0,
-            usage: 0.0,
-            memory_usage: 0.0,
-        })
-    } else {
-        Ok(GpuDetailedInfo {
-            name: "未检测到".to_string(),
-            vendor: "N/A".to_string(),
-            memory: "N/A".to_string(),
-            memory_type: "N/A".to_string(),
-            driver_version: "N/A".to_string(),
-            core_frequency: "N/A".to_string(),
-            memory_frequency: "N/A".to_string(),
-            temperature: 0.0,
-            usage: 0.0,
-            memory_usage: 0.0,
-        })
+    // 先尝试 WMI，失败则 fallback 到 sysinfo
+    if let Ok(wmi) = get_wmi_connection() {
+        if let Ok(controllers) = wmi.query::<Win32VideoController>() {
+            if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| !n.contains("Microsoft"))).next() {
+                let memory = controller.adapter_ram.unwrap_or(0);
+                return Ok(GpuDetailedInfo {
+                    name: controller.name.clone().unwrap_or_else(|| "Unknown".to_string()),
+                    vendor: "N/A".to_string(),
+                    memory: format_bytes(memory),
+                    memory_type: "N/A".to_string(),
+                    driver_version: controller.driver_version.clone().unwrap_or_else(|| "N/A".to_string()),
+                    core_frequency: "N/A".to_string(),
+                    memory_frequency: "N/A".to_string(),
+                    temperature: 0.0,
+                    usage: 0.0,
+                    memory_usage: 0.0,
+                });
+            }
+        }
     }
+    
+    // WMI 失败，使用 sysinfo fallback
+    let sys = System::new_all();
+    let gpu_name = sys.gpus().first()
+        .map(|g| g.name().to_string())
+        .unwrap_or_else(|| "未检测到".to_string());
+    
+    Ok(GpuDetailedInfo {
+        name: gpu_name,
+        vendor: "N/A".to_string(),
+        memory: "N/A".to_string(),
+        memory_type: "N/A".to_string(),
+        driver_version: "N/A".to_string(),
+        core_frequency: "N/A".to_string(),
+        memory_frequency: "N/A".to_string(),
+        temperature: 0.0,
+        usage: 0.0,
+        memory_usage: 0.0,
+    })
 }
 
 #[tauri::command]
