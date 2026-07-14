@@ -1,10 +1,10 @@
+use crate::hardware::{cpu, gpu, disk};
 use crate::system_info::*;
 use std::fs;
 use std::path::Path;
 use tauri::State;
 use sysinfo::System;
 use wmi::{COMLibrary, WMIConnection, WMIDateTime};
-use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
 
 fn get_wmi_connection() -> Result<WMIConnection, String> {
     // 先尝试让wmi crate初始化COM
@@ -187,10 +187,11 @@ fn get_gpu_info_internal() -> Result<GpuInfo, String> {
     
     if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| is_real_gpu(n))).next() {
         let memory = controller.adapter_ram.unwrap_or(0);
+        let temperature = gpu::get_gpu_temperature().unwrap_or(0.0);
         Ok(GpuInfo {
             name: controller.name.unwrap_or_else(|| "Unknown".to_string()),
             memory: format_bytes(memory),
-            temperature: 0.0,
+            temperature,
         })
     } else {
         Ok(GpuInfo {
@@ -233,6 +234,7 @@ fn get_gpu_detailed_info_internal() -> Result<GpuDetailedInfo, String> {
     
     if let Some(controller) = controllers.into_iter().filter(|c| c.name.as_ref().map_or(false, |n| is_real_gpu(n))).next() {
         let memory = controller.adapter_ram.unwrap_or(0);
+        let temperature = gpu::get_gpu_temperature().unwrap_or(0.0);
         Ok(GpuDetailedInfo {
             name: controller.name.clone().unwrap_or_else(|| "Unknown".to_string()),
             vendor: "N/A".to_string(),
@@ -241,7 +243,7 @@ fn get_gpu_detailed_info_internal() -> Result<GpuDetailedInfo, String> {
             driver_version: controller.driver_version.clone().unwrap_or_else(|| "N/A".to_string()),
             core_frequency: "N/A".to_string(),
             memory_frequency: "N/A".to_string(),
-            temperature: 0.0,
+            temperature,
             usage: 0.0,
             memory_usage: 0.0,
         })
@@ -700,22 +702,13 @@ fn get_bios_info_internal() -> Result<BiosInfo, String> {
 
 // ==================== 监控相关命令 ====================
 
-#[derive(Debug, serde::Deserialize)]
-#[serde(rename = "MSAcpi_ThermalZoneTemperature", rename_all = "PascalCase")]
-struct MSAcpiThermalZoneTemperature {
-    current_temperature: Option<i32>,
-}
-
 // 从 WMI 获取 CPU 温度
 fn get_cpu_temperature_from_wmi() -> Result<f32, String> {
-    let wmi = get_wmi_connection()?;
-    let zones: Vec<MSAcpiThermalZoneTemperature> = wmi.query().map_err(|e| e.to_string())?;
-    for zone in zones {
-        if let Some(temp) = zone.current_temperature {
-            return Ok((temp - 2732) as f32 / 10.0);
-        }
+    if let Some(temp) = cpu::get_cpu_temperature() {
+        Ok(temp)
+    } else {
+        Err("无法从 WMI 获取 CPU 温度".to_string())
     }
-    Err("No thermal zone found".to_string())
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -742,32 +735,14 @@ pub fn get_temperatures() -> Result<Temperatures, String> {
 }
 
 fn get_temperatures_internal() -> Result<Temperatures, String> {
-    let wmi = get_wmi_connection()?;
-    
-    let zones: Vec<MSAcpiThermalZoneTemperature> = wmi.query().map_err(|e| e.to_string())?;
-    
-    let mut cpu_temp = 0.0;
-    let mut gpu_temp = 0.0;
-    let mut disk_temp = 0.0;
-    
-    for zone in zones {
-        if let Some(temp) = zone.current_temperature {
-            let celsius = (temp - 2732) as f32 / 10.0;
-            if cpu_temp == 0.0 {
-                cpu_temp = celsius;
-            } else if gpu_temp == 0.0 {
-                gpu_temp = celsius;
-            } else if disk_temp == 0.0 {
-                disk_temp = celsius;
-                break;
-            }
-        }
-    }
-    
+    let cpu_temp = cpu::get_cpu_temperature().unwrap_or(0.0);
+    let gpu_temp = gpu::get_gpu_temperature().unwrap_or(0.0);
+    let disk_temp = disk::get_disk_temperature().unwrap_or(0.0);
+
     Ok(Temperatures {
-        cpu: if cpu_temp > 0.0 { cpu_temp } else { 0.0 },
-        gpu: if gpu_temp > 0.0 { gpu_temp } else { 0.0 },
-        disk: if disk_temp > 0.0 { disk_temp } else { 0.0 },
+        cpu: cpu_temp,
+        gpu: gpu_temp,
+        disk: disk_temp,
     })
 }
 

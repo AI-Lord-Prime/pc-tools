@@ -1,11 +1,18 @@
 <template>
   <div class="memory-info">
-    <h2 class="page-title">内存信息</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">内存信息</h2>
+        <span class="page-subtitle">内存详情与使用情况</span>
+      </div>
+    </div>
     
-    <el-card class="info-card" shadow="hover">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Coin /></el-icon>
+          <div class="card-icon-badge memory">
+            <el-icon :size="18"><Coin /></el-icon>
+          </div>
           <span>内存详情</span>
         </div>
       </template>
@@ -21,19 +28,21 @@
       </el-descriptions>
     </el-card>
     
-    <el-card class="usage-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="usage-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><TrendCharts /></el-icon>
+          <div class="card-icon-badge monitor">
+            <el-icon :size="18"><TrendCharts /></el-icon>
+          </div>
           <span>内存使用情况</span>
         </div>
       </template>
       <div class="memory-bar">
         <div class="bar-label">
           <span>内存使用率</span>
-          <span>{{ memoryInfo.usagePercent }}%</span>
+          <span class="bar-percent">{{ memoryInfo.usagePercent }}%</span>
         </div>
-        <el-progress :percentage="memoryInfo.usagePercent" :color="getProgressColor(memoryInfo.usagePercent)" :stroke-width="20" />
+        <el-progress :percentage="memoryInfo.usagePercent" :color="getProgressColor(memoryInfo.usagePercent)" :stroke-width="18" :show-text="false" />
         <div class="bar-detail">
           <span>已使用: {{ memoryInfo.used }}</span>
           <span>可用: {{ memoryInfo.available }}</span>
@@ -42,14 +51,16 @@
       </div>
     </el-card>
     
-    <el-card class="modules-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="modules-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><List /></el-icon>
+          <div class="card-icon-badge list">
+            <el-icon :size="18"><List /></el-icon>
+          </div>
           <span>内存条详情</span>
         </div>
       </template>
-      <el-table :data="memoryModules" style="width: 100%" dark>
+      <el-table :data="memoryModules" style="width: 100%">
         <el-table-column prop="slot" label="插槽" width="100" />
         <el-table-column prop="manufacturer" label="制造商" width="150" />
         <el-table-column prop="model" label="型号" />
@@ -101,9 +112,9 @@ const memoryModules = ref<MemoryModule[]>([])
 let updateInterval: number | null = null
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 50) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 50) return '#a855f7'
+  if (percentage < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const fetchMemoryInfo = async () => {
@@ -133,57 +144,85 @@ onUnmounted(() => {
 
 <style scoped>
 .memory-info {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.info-card, .usage-card, .modules-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.memory {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.card-icon-badge.monitor {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-badge.list {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 
 .memory-bar {
-  padding: 20px;
+  padding: 16px;
 }
 
 .bar-label {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  color: #a0a0a0;
+  color: #64748b;
+}
+
+.bar-percent {
+  font-weight: 700;
+  color: #a855f7;
 }
 
 .bar-detail {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
-  color: #a0a0a0;
-  font-size: 14px;
-}
-
-:deep(.el-descriptions) {
-  --el-descriptions-item-bordered-label-background: #2a2a2a;
-}
-
-:deep(.el-descriptions__label) {
-  color: #a0a0a0;
-}
-
-:deep(.el-descriptions__content) {
-  color: #e0e0e0;
+  margin-top: 12px;
+  color: #64748b;
+  font-size: 13px;
 }
 </style>

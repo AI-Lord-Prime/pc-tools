@@ -1,16 +1,23 @@
 <template>
   <div class="startup">
-    <h2 class="page-title">启动项管理</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">启动项管理</h2>
+        <span class="page-subtitle">开机启动项管理</span>
+      </div>
+    </div>
     
-    <el-card class="startup-card" shadow="hover">
+    <el-card class="startup-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Star /></el-icon>
+          <div class="card-icon-badge startup">
+            <el-icon :size="18"><Star /></el-icon>
+          </div>
           <span>启动项列表</span>
           <el-button type="primary" size="small" style="margin-left: auto;" @click="refreshList">刷新</el-button>
         </div>
       </template>
-      <el-table :data="startupItems" style="width: 100%" dark>
+      <el-table :data="startupItems" style="width: 100%">
         <el-table-column prop="name" label="名称" width="200" />
         <el-table-column prop="publisher" label="发布者" width="150" />
         <el-table-column prop="path" label="路径" />
@@ -80,26 +87,48 @@ onMounted(() => {
 
 <style scoped>
 .startup {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.startup-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 </style>

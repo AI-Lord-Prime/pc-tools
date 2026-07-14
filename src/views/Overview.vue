@@ -1,109 +1,76 @@
 <template>
   <div class="overview">
-    <h2 class="page-title">系统概览</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">系统概览</h2>
+        <span class="page-subtitle">实时硬件状态监控</span>
+      </div>
+    </div>
     
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <!-- CPU 概览卡片 -->
-      <el-col :span="12">
-        <el-card class="info-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Cpu /></el-icon>
-              <span>CPU</span>
-            </div>
-          </template>
-          <div class="card-content">
-            <div class="info-item">
-              <span class="label">处理器:</span>
-              <span class="value">{{ cpuInfo.name }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">核心数:</span>
-              <span class="value">{{ cpuInfo.cores }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">使用率:</span>
-              <el-progress :percentage="cpuInfo.usage" :color="getProgressColor(cpuInfo.usage)" />
+      <el-col :span="6">
+        <el-card class="info-card" shadow="never">
+          <div class="card-icon-wrap cpu">
+            <el-icon :size="22"><Cpu /></el-icon>
+          </div>
+          <div class="card-data">
+            <span class="card-label">CPU</span>
+            <span class="card-value">{{ cpuInfo.name }}</span>
+            <div class="card-stats">
+              <span>{{ cpuInfo.cores }} 核心</span>
+              <el-progress :percentage="cpuInfo.usage" :color="getProgressColor(cpuInfo.usage)" :stroke-width="6" :show-text="false" />
+              <span class="usage-text">{{ cpuInfo.usage }}%</span>
             </div>
           </div>
         </el-card>
       </el-col>
       
       <!-- 内存概览卡片 -->
-      <el-col :span="12">
-        <el-card class="info-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Coin /></el-icon>
-              <span>内存</span>
-            </div>
-          </template>
-          <div class="card-content">
-            <div class="info-item">
-              <span class="label">总容量:</span>
-              <span class="value">{{ memoryInfo.total }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">已使用:</span>
-              <span class="value">{{ memoryInfo.used }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">使用率:</span>
-              <el-progress :percentage="memoryInfo.usage" :color="getProgressColor(memoryInfo.usage)" />
+      <el-col :span="6">
+        <el-card class="info-card" shadow="never">
+          <div class="card-icon-wrap memory">
+            <el-icon :size="22"><Coin /></el-icon>
+          </div>
+          <div class="card-data">
+            <span class="card-label">内存</span>
+            <span class="card-value">{{ memoryInfo.used }} / {{ memoryInfo.total }}</span>
+            <div class="card-stats">
+              <el-progress :percentage="memoryInfo.usage" :color="getProgressColor(memoryInfo.usage)" :stroke-width="6" :show-text="false" />
+              <span class="usage-text">{{ memoryInfo.usage }}%</span>
             </div>
           </div>
         </el-card>
       </el-col>
-    </el-row>
-    
-    <el-row :gutter="20" style="margin-top: 20px;">
+      
       <!-- GPU 概览卡片 -->
-      <el-col :span="12">
-        <el-card class="info-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon><VideoCameraFilled /></el-icon>
-              <span>显卡</span>
-            </div>
-          </template>
-          <div class="card-content">
-            <div class="info-item">
-              <span class="label">显卡型号:</span>
-              <span class="value">{{ gpuInfo.name }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">显存:</span>
-              <span class="value">{{ gpuInfo.memory }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">温度:</span>
-              <span class="value">{{ formatNumber(gpuInfo.temperature) }}°C</span>
+      <el-col :span="6">
+        <el-card class="info-card" shadow="never">
+          <div class="card-icon-wrap gpu">
+            <el-icon :size="22"><VideoCameraFilled /></el-icon>
+          </div>
+          <div class="card-data">
+            <span class="card-label">显卡</span>
+            <span class="card-value">{{ gpuInfo.name }}</span>
+            <div class="card-stats">
+              <span>显存 {{ gpuInfo.memory }}</span>
+              <span class="temp-text">{{ formatNumber(gpuInfo.temperature) }}°C</span>
             </div>
           </div>
         </el-card>
       </el-col>
       
       <!-- 系统信息卡片 -->
-      <el-col :span="12">
-        <el-card class="info-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Monitor /></el-icon>
-              <span>系统</span>
-            </div>
-          </template>
-          <div class="card-content">
-            <div class="info-item">
-              <span class="label">操作系统:</span>
-              <span class="value">{{ systemInfo.os }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">系统版本:</span>
-              <span class="value">{{ systemInfo.version }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">主机名:</span>
-              <span class="value">{{ systemInfo.hostname }}</span>
+      <el-col :span="6">
+        <el-card class="info-card" shadow="never">
+          <div class="card-icon-wrap system">
+            <el-icon :size="22"><Monitor /></el-icon>
+          </div>
+          <div class="card-data">
+            <span class="card-label">系统</span>
+            <span class="card-value">{{ systemInfo.os }}</span>
+            <div class="card-stats">
+              <span>{{ systemInfo.version }}</span>
             </div>
           </div>
         </el-card>
@@ -111,21 +78,24 @@
     </el-row>
     
     <!-- 磁盘概览 -->
-    <el-card class="disk-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="disk-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
           <el-icon><Folder /></el-icon>
-          <span>磁盘</span>
+          <span>磁盘存储</span>
         </div>
       </template>
-      <el-table :data="diskInfo" style="width: 100%" dark>
+      <el-table :data="diskInfo" style="width: 100%">
         <el-table-column prop="name" label="磁盘名称" width="200" />
         <el-table-column prop="total" label="总容量" width="120" />
         <el-table-column prop="used" label="已使用" width="120" />
         <el-table-column prop="free" label="可用空间" width="120" />
         <el-table-column label="使用率">
           <template #default="scope">
-            <el-progress :percentage="scope.row.usage" :color="getProgressColor(scope.row.usage)" />
+            <div class="usage-bar-wrap">
+              <el-progress :percentage="scope.row.usage" :color="getProgressColor(scope.row.usage)" :stroke-width="8" :show-text="false" />
+              <span class="usage-percent">{{ scope.row.usage }}%</span>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -198,9 +168,9 @@ const diskInfo = ref<DiskInfoItem[]>([])
 let updateInterval: number | null = null
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 50) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 50) return '#3b82f6'
+  if (percentage < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const formatNumber = (num: number) => {
@@ -232,7 +202,6 @@ const fetchSystemInfo = async () => {
 
 onMounted(() => {
   fetchSystemInfo()
-  // 每3秒更新一次动态数据
   updateInterval = window.setInterval(fetchSystemInfo, 3000)
 })
 
@@ -245,60 +214,130 @@ onUnmounted(() => {
 
 <style scoped>
 .overview {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .info-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+  height: 100%;
+}
+
+.card-icon-wrap {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.card-icon-wrap.cpu {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-wrap.memory {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.card-icon-wrap.gpu {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.card-icon-wrap.system {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.card-data {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.card-value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.usage-text {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.temp-text {
+  font-weight: 600;
+  color: #22c55e;
+}
+
+.disk-card {
+  margin-top: 16px;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  gap: 8px;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.card-content {
-  padding: 10px 0;
-}
-
-.info-item {
+.usage-bar-wrap {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  gap: 10px;
+  width: 100%;
 }
 
-.info-item .label {
-  width: 80px;
-  color: #a0a0a0;
-}
-
-.info-item .value {
-  flex: 1;
-  color: #e0e0e0;
-}
-
-.disk-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-}
-
-:deep(.el-card__header) {
-  border-bottom: 1px solid #333;
-  padding: 15px 20px;
-}
-
-:deep(.el-progress__text) {
-  color: #e0e0e0 !important;
+.usage-percent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
 }
 </style>

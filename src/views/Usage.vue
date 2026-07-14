@@ -1,26 +1,34 @@
 <template>
   <div class="usage">
-    <h2 class="page-title">使用率监控</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">使用率监控</h2>
+        <span class="page-subtitle">CPU / 内存 / GPU / 网络实时使用率</span>
+      </div>
+    </div>
     
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <el-col :span="12">
-        <el-card class="usage-card" shadow="hover">
+        <el-card class="usage-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><Cpu /></el-icon>
+              <div class="card-icon-badge cpu">
+                <el-icon :size="18"><Cpu /></el-icon>
+              </div>
               <span>CPU 使用率</span>
             </div>
           </template>
           <div class="usage-content">
-            <el-progress type="dashboard" :percentage="cpuUsage.total" :color="getProgressColor(cpuUsage.total)" :width="150">
+            <el-progress type="dashboard" :percentage="cpuUsage.total" :color="getProgressColor(cpuUsage.total)" :width="120">
               <template #default="{ percentage }">
-                <span class="percentage-value">{{ formatNumber(percentage) }}%</span>
+                <span class="dashboard-value">{{ formatNumber(percentage) }}%</span>
               </template>
             </el-progress>
             <div class="core-usage">
               <div v-for="(core, index) in cpuUsage.cores" :key="index" class="core-item">
                 <span class="core-label">核心 {{ index }}</span>
-                <el-progress :percentage="core" :color="getProgressColor(core)" :stroke-width="10" />
+                <el-progress :percentage="core" :color="getProgressColor(core)" :stroke-width="6" :show-text="false" />
+                <span class="core-percent">{{ core }}%</span>
               </div>
             </div>
           </div>
@@ -28,30 +36,32 @@
       </el-col>
       
       <el-col :span="12">
-        <el-card class="usage-card" shadow="hover">
+        <el-card class="usage-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><Coin /></el-icon>
+              <div class="card-icon-badge memory">
+                <el-icon :size="18"><Coin /></el-icon>
+              </div>
               <span>内存使用率</span>
             </div>
           </template>
           <div class="usage-content">
-            <el-progress type="dashboard" :percentage="memoryUsage.percentage" :color="getProgressColor(memoryUsage.percentage)" :width="150">
+            <el-progress type="dashboard" :percentage="memoryUsage.percentage" :color="getProgressColor(memoryUsage.percentage)" :width="120">
               <template #default="{ percentage }">
-                <span class="percentage-value">{{ formatNumber(percentage) }}%</span>
+                <span class="dashboard-value">{{ formatNumber(percentage) }}%</span>
               </template>
             </el-progress>
             <div class="memory-details">
-              <div class="detail-item">
-                <span class="detail-label">已使用:</span>
+              <div class="detail-row">
+                <span class="detail-label">已使用</span>
                 <span class="detail-value">{{ memoryUsage.used }}</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">可用:</span>
+              <div class="detail-row">
+                <span class="detail-label">可用</span>
                 <span class="detail-value">{{ memoryUsage.available }}</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">总计:</span>
+              <div class="detail-row">
+                <span class="detail-label">总计</span>
                 <span class="detail-value">{{ memoryUsage.total }}</span>
               </div>
             </div>
@@ -60,29 +70,33 @@
       </el-col>
     </el-row>
     
-    <el-row :gutter="20" style="margin-top: 20px;">
+    <el-row :gutter="16" style="margin-top: 16px;">
       <el-col :span="12">
-        <el-card class="usage-card" shadow="hover">
+        <el-card class="usage-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><VideoCameraFilled /></el-icon>
+              <div class="card-icon-badge gpu">
+                <el-icon :size="18"><VideoCameraFilled /></el-icon>
+              </div>
               <span>GPU 使用率</span>
             </div>
           </template>
           <div class="usage-content">
-            <el-progress type="dashboard" :percentage="gpuUsage.core" :color="getProgressColor(gpuUsage.core)" :width="150">
+            <el-progress type="dashboard" :percentage="gpuUsage.core" :color="getProgressColor(gpuUsage.core)" :width="120">
               <template #default="{ percentage }">
-                <span class="percentage-value">{{ formatNumber(percentage) }}%</span>
+                <span class="dashboard-value">{{ formatNumber(percentage) }}%</span>
               </template>
             </el-progress>
             <div class="gpu-details">
-              <div class="detail-item">
-                <span class="detail-label">GPU 核心:</span>
-                <el-progress :percentage="gpuUsage.core" :color="getProgressColor(gpuUsage.core)" :stroke-width="10" />
+              <div class="detail-row">
+                <span class="detail-label">GPU 核心</span>
+                <el-progress :percentage="gpuUsage.core" :color="getProgressColor(gpuUsage.core)" :stroke-width="6" :show-text="false" style="flex: 1" />
+                <span class="core-percent">{{ gpuUsage.core }}%</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">显存:</span>
-                <el-progress :percentage="gpuUsage.memory" :color="getProgressColor(gpuUsage.memory)" :stroke-width="10" />
+              <div class="detail-row">
+                <span class="detail-label">显存</span>
+                <el-progress :percentage="gpuUsage.memory" :color="getProgressColor(gpuUsage.memory)" :stroke-width="6" :show-text="false" style="flex: 1" />
+                <span class="core-percent">{{ gpuUsage.memory }}%</span>
               </div>
             </div>
           </div>
@@ -90,22 +104,24 @@
       </el-col>
       
       <el-col :span="12">
-        <el-card class="usage-card" shadow="hover">
+        <el-card class="usage-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><Connection /></el-icon>
+              <div class="card-icon-badge network">
+                <el-icon :size="18"><Connection /></el-icon>
+              </div>
               <span>网络使用</span>
             </div>
           </template>
           <div class="usage-content">
             <div class="network-stats">
               <div class="network-item">
-                <el-icon><Download /></el-icon>
+                <el-icon :size="20"><Download /></el-icon>
                 <span class="network-label">下载速度</span>
                 <span class="network-value">{{ networkUsage.download }}</span>
               </div>
               <div class="network-item">
-                <el-icon><Upload /></el-icon>
+                <el-icon :size="20"><Upload /></el-icon>
                 <span class="network-label">上传速度</span>
                 <span class="network-value">{{ networkUsage.upload }}</span>
               </div>
@@ -168,9 +184,9 @@ const networkUsage = ref<NetworkUsage>({
 let updateInterval: number | null = null
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 50) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 50) return '#3b82f6'
+  if (percentage < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const formatNumber = (num: number) => {
@@ -215,27 +231,67 @@ onUnmounted(() => {
 
 <style scoped>
 .usage {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.usage-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.cpu {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-badge.memory {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.card-icon-badge.gpu {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.card-icon-badge.network {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 
 .usage-content {
@@ -246,10 +302,10 @@ onUnmounted(() => {
   padding: 20px;
 }
 
-.percentage-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #e0e0e0;
+.dashboard-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 .core-usage {
@@ -260,30 +316,43 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .core-label {
   width: 60px;
-  color: #a0a0a0;
+  color: #64748b;
   font-size: 12px;
+}
+
+.core-percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  width: 48px;
+  text-align: right;
 }
 
 .memory-details, .gpu-details {
   width: 100%;
 }
 
-.detail-item {
-  margin-bottom: 15px;
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .detail-label {
-  color: #a0a0a0;
-  margin-right: 10px;
+  color: #64748b;
+  font-size: 13px;
 }
 
 .detail-value {
-  color: #e0e0e0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .network-stats {
@@ -293,9 +362,9 @@ onUnmounted(() => {
 .network-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 20px;
-  border-bottom: 1px solid #333;
+  gap: 16px;
+  padding: 24px 16px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .network-item:last-child {
@@ -303,17 +372,14 @@ onUnmounted(() => {
 }
 
 .network-label {
-  color: #a0a0a0;
+  color: #64748b;
   flex: 1;
+  font-size: 14px;
 }
 
 .network-value {
-  color: #409eff;
+  color: #1e293b;
   font-size: 18px;
-  font-weight: bold;
-}
-
-:deep(.el-progress__text) {
-  color: #e0e0e0 !important;
+  font-weight: 700;
 }
 </style>

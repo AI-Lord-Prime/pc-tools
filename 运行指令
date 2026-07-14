@@ -1,1 +1,4 @@
-npm run tauri dev
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+admin-manifest = []  # 新增

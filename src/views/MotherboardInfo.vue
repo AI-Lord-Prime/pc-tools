@@ -1,11 +1,18 @@
 <template>
   <div class="motherboard-info">
-    <h2 class="page-title">主板信息</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">主板信息</h2>
+        <span class="page-subtitle">主板与 BIOS 详情</span>
+      </div>
+    </div>
     
-    <el-card class="info-card" shadow="hover">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Grid /></el-icon>
+          <div class="card-icon-badge board">
+            <el-icon :size="18"><Grid /></el-icon>
+          </div>
           <span>主板详情</span>
         </div>
       </template>
@@ -19,10 +26,12 @@
       </el-descriptions>
     </el-card>
     
-    <el-card class="bios-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="bios-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><Document /></el-icon>
+          <div class="card-icon-badge bios">
+            <el-icon :size="18"><Document /></el-icon>
+          </div>
           <span>BIOS 信息</span>
         </div>
       </template>
@@ -92,38 +101,56 @@ onMounted(() => {
 
 <style scoped>
 .motherboard-info {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.info-card, .bios-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-:deep(.el-descriptions) {
-  --el-descriptions-item-bordered-label-background: #2a2a2a;
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
 }
 
-:deep(.el-descriptions__label) {
-  color: #a0a0a0;
+.card-icon-badge.board {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-:deep(.el-descriptions__content) {
-  color: #e0e0e0;
+.card-icon-badge.bios {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 </style>

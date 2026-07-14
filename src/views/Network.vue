@@ -1,13 +1,20 @@
 <template>
   <div class="network">
-    <h2 class="page-title">网络工具</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">网络工具</h2>
+        <span class="page-subtitle">网络信息与测速</span>
+      </div>
+    </div>
     
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <el-col :span="12">
-        <el-card class="tool-card" shadow="hover">
+        <el-card class="tool-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><Connection /></el-icon>
+              <div class="card-icon-badge info">
+                <el-icon :size="18"><Connection /></el-icon>
+              </div>
               <span>网络信息</span>
             </div>
           </template>
@@ -22,10 +29,12 @@
       </el-col>
       
       <el-col :span="12">
-        <el-card class="tool-card" shadow="hover">
+        <el-card class="tool-card" shadow="never">
           <template #header>
             <div class="card-header">
-              <el-icon><Promotion /></el-icon>
+              <div class="card-icon-badge test">
+                <el-icon :size="18"><Promotion /></el-icon>
+              </div>
               <span>网络测试</span>
             </div>
           </template>
@@ -42,10 +51,12 @@
       </el-col>
     </el-row>
     
-    <el-card class="speed-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="speed-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><Odometer /></el-icon>
+          <div class="card-icon-badge speed">
+            <el-icon :size="18"><Odometer /></el-icon>
+          </div>
           <span>实时网速</span>
         </div>
       </template>
@@ -157,27 +168,62 @@ onUnmounted(() => {
 
 <style scoped>
 .network {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.tool-card, .speed-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-badge.test {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.card-icon-badge.speed {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 
 .test-tools {
@@ -191,16 +237,16 @@ onUnmounted(() => {
 }
 
 .test-result {
-  background-color: #121212;
+  background-color: #f8fafc;
   padding: 15px;
-  border-radius: 4px;
+  border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
 }
 
 .test-result pre {
   margin: 0;
-  color: #67c23a;
+  color: #22c55e;
   font-family: monospace;
   white-space: pre-wrap;
 }
@@ -213,15 +259,15 @@ onUnmounted(() => {
 }
 
 .speed-icon {
-  font-size: 48px;
+  font-size: 44px;
 }
 
 .speed-icon.download {
-  color: #67c23a;
+  color: #22c55e;
 }
 
 .speed-icon.upload {
-  color: #409eff;
+  color: #3b82f6;
 }
 
 .speed-info {
@@ -231,25 +277,13 @@ onUnmounted(() => {
 }
 
 .speed-label {
-  color: #a0a0a0;
+  color: #64748b;
   font-size: 14px;
 }
 
 .speed-value {
-  color: #e0e0e0;
+  color: #1e293b;
   font-size: 24px;
-  font-weight: bold;
-}
-
-:deep(.el-descriptions) {
-  --el-descriptions-item-bordered-label-background: #2a2a2a;
-}
-
-:deep(.el-descriptions__label) {
-  color: #a0a0a0;
-}
-
-:deep(.el-descriptions__content) {
-  color: #e0e0e0;
+  font-weight: 700;
 }
 </style>

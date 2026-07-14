@@ -1,23 +1,30 @@
 <template>
   <div class="driver">
-    <h2 class="page-title">驱动管理</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">驱动管理</h2>
+        <span class="page-subtitle">系统驱动扫描与更新</span>
+      </div>
+    </div>
     
-    <el-card class="driver-card" shadow="hover">
+    <el-card class="driver-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><SetUp /></el-icon>
+          <div class="card-icon-badge driver">
+            <el-icon :size="18"><SetUp /></el-icon>
+          </div>
           <span>驱动列表</span>
           <el-button type="primary" size="small" style="margin-left: auto;" @click="scanDrivers">扫描驱动</el-button>
         </div>
       </template>
-      <el-table :data="driverList" style="width: 100%" dark>
+      <el-table :data="driverList" style="width: 100%">
         <el-table-column prop="name" label="驱动名称" width="250" />
         <el-table-column prop="version" label="版本" width="150" />
         <el-table-column prop="date" label="日期" width="120" />
         <el-table-column prop="publisher" label="发布者" width="150" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.status === '正常' ? 'success' : 'warning'">{{ scope.row.status }}</el-tag>
+            <el-tag :type="scope.row.status === '正常' ? 'success' : 'warning'" size="small">{{ scope.row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="150">
@@ -71,26 +78,48 @@ onMounted(() => {
 
 <style scoped>
 .driver {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.driver-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 </style>

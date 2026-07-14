@@ -1,10 +1,15 @@
 <template>
   <div class="benchmark">
-    <h2 class="page-title">性能测试</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">性能测试</h2>
+        <span class="page-subtitle">CPU / GPU / 磁盘性能跑分</span>
+      </div>
+    </div>
     
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <el-col :span="8">
-        <el-card class="bench-card" shadow="hover">
+        <el-card class="bench-card" shadow="never">
           <div class="bench-content">
             <el-icon class="bench-icon"><Cpu /></el-icon>
             <span class="bench-title">CPU 性能测试</span>
@@ -18,7 +23,7 @@
       </el-col>
       
       <el-col :span="8">
-        <el-card class="bench-card" shadow="hover">
+        <el-card class="bench-card" shadow="never">
           <div class="bench-content">
             <el-icon class="bench-icon"><VideoCameraFilled /></el-icon>
             <span class="bench-title">GPU 性能测试</span>
@@ -32,7 +37,7 @@
       </el-col>
       
       <el-col :span="8">
-        <el-card class="bench-card" shadow="hover">
+        <el-card class="bench-card" shadow="never">
           <div class="bench-content">
             <el-icon class="bench-icon"><Folder /></el-icon>
             <span class="bench-title">磁盘性能测试</span>
@@ -46,14 +51,16 @@
       </el-col>
     </el-row>
     
-    <el-card class="result-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="result-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><TrendCharts /></el-icon>
+          <div class="card-icon-badge result">
+            <el-icon :size="18"><TrendCharts /></el-icon>
+          </div>
           <span>测试结果</span>
         </div>
       </template>
-      <el-table :data="benchmarkResults" style="width: 100%" dark>
+      <el-table :data="benchmarkResults" style="width: 100%">
         <el-table-column prop="name" label="测试项目" width="200" />
         <el-table-column prop="score" label="得分" width="150" />
         <el-table-column prop="detail" label="详细信息" />
@@ -145,36 +152,57 @@ const runDiskBench = async () => {
 
 <style scoped>
 .benchmark {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .bench-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+  transition: all 0.3s ease;
+}
+
+.bench-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
 }
 
 .bench-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   padding: 20px;
 }
 
 .bench-icon {
-  font-size: 48px;
-  color: #409eff;
+  font-size: 44px;
+  color: #3b82f6;
 }
 
 .bench-title {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .bench-result {
@@ -184,26 +212,36 @@ const runDiskBench = async () => {
 }
 
 .score-label {
-  color: #a0a0a0;
+  color: #64748b;
 }
 
 .score-value {
-  color: #67c23a;
+  color: #22c55e;
   font-size: 24px;
-  font-weight: bold;
-}
-
-.result-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+  font-weight: 700;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.result-card {
+  margin-top: 16px;
 }
 </style>

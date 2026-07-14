@@ -1,11 +1,18 @@
 <template>
   <div class="settings">
-    <h2 class="page-title">设置</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">设置</h2>
+        <span class="page-subtitle">应用偏好与通知</span>
+      </div>
+    </div>
     
-    <el-card class="settings-card" shadow="hover">
+    <el-card class="settings-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Setting /></el-icon>
+          <div class="card-icon-badge general">
+            <el-icon :size="18"><Setting /></el-icon>
+          </div>
           <span>常规设置</span>
         </div>
       </template>
@@ -32,10 +39,12 @@
       </el-form>
     </el-card>
     
-    <el-card class="settings-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="settings-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><Bell /></el-icon>
+          <div class="card-icon-badge notify">
+            <el-icon :size="18"><Bell /></el-icon>
+          </div>
           <span>通知设置</span>
         </div>
       </template>
@@ -49,18 +58,20 @@
       </el-form>
     </el-card>
     
-    <el-card class="settings-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="settings-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><InfoFilled /></el-icon>
+          <div class="card-icon-badge about">
+            <el-icon :size="18"><InfoFilled /></el-icon>
+          </div>
           <span>关于</span>
         </div>
       </template>
       <div class="about-content">
-        <p><strong>查机工具箱</strong></p>
-        <p>版本: 0.0.1</p>
-        <p>基于 Tauri + Vue 3 开发</p>
-        <p>一款简洁高效的系统工具集</p>
+        <div class="about-name">查机工具箱</div>
+        <div class="about-row"><span class="about-label">版本</span><span>0.0.1</span></div>
+        <div class="about-row"><span class="about-label">框架</span><span>Tauri + Vue 3</span></div>
+        <div class="about-desc">一款简洁高效的系统硬件检测工具集</div>
       </div>
     </el-card>
   </div>
@@ -116,39 +127,89 @@ onMounted(() => {
 
 <style scoped>
 .settings {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.settings-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.general {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-badge.notify {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.card-icon-badge.about {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
 }
 
 .about-content {
   padding: 20px;
-  line-height: 2;
 }
 
-.about-content p {
-  margin: 0;
+.about-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
 }
 
-:deep(.el-form-item__label) {
-  color: #a0a0a0;
+.about-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.about-label {
+  color: #64748b;
+  width: 60px;
+}
+
+.about-desc {
+  margin-top: 16px;
+  color: #64748b;
+  font-size: 13px;
 }
 </style>

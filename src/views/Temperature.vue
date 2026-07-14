@@ -1,65 +1,73 @@
 <template>
   <div class="temperature">
-    <h2 class="page-title">温度监控</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">温度监控</h2>
+        <span class="page-subtitle">硬件温度实时监测</span>
+      </div>
+    </div>
     
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <el-col :span="8">
-        <el-card class="temp-card" shadow="hover">
+        <el-card class="temp-card" shadow="never">
           <div class="temp-content">
-            <el-icon class="temp-icon cpu"><Cpu /></el-icon>
+            <div class="temp-icon-wrap cpu">
+              <el-icon :size="28"><Cpu /></el-icon>
+            </div>
             <div class="temp-info">
               <span class="temp-label">CPU 温度</span>
-              <span class="temp-value" :class="getTempClass(temperatures.cpu)">{{ formatNumber(temperatures.cpu) }}°C</span>
+              <span class="temp-value" :class="getTempClass(temperatures.cpu)">{{ formatTemp(temperatures.cpu) }}<span v-if="isTempAvailable(temperatures.cpu)" class="temp-unit">°C</span></span>
             </div>
-            <el-progress type="dashboard" :percentage="temperatures.cpu" :color="getTempColor(temperatures.cpu)" :width="80" />
           </div>
         </el-card>
       </el-col>
       
       <el-col :span="8">
-        <el-card class="temp-card" shadow="hover">
+        <el-card class="temp-card" shadow="never">
           <div class="temp-content">
-            <el-icon class="temp-icon gpu"><VideoCameraFilled /></el-icon>
+            <div class="temp-icon-wrap gpu">
+              <el-icon :size="28"><VideoCameraFilled /></el-icon>
+            </div>
             <div class="temp-info">
               <span class="temp-label">GPU 温度</span>
-              <span class="temp-value" :class="getTempClass(temperatures.gpu)">{{ formatNumber(temperatures.gpu) }}°C</span>
+              <span class="temp-value" :class="getTempClass(temperatures.gpu)">{{ formatTemp(temperatures.gpu) }}<span v-if="isTempAvailable(temperatures.gpu)" class="temp-unit">°C</span></span>
             </div>
-            <el-progress type="dashboard" :percentage="temperatures.gpu" :color="getTempColor(temperatures.gpu)" :width="80" />
           </div>
         </el-card>
       </el-col>
       
       <el-col :span="8">
-        <el-card class="temp-card" shadow="hover">
+        <el-card class="temp-card" shadow="never">
           <div class="temp-content">
-            <el-icon class="temp-icon disk"><Folder /></el-icon>
+            <div class="temp-icon-wrap disk">
+              <el-icon :size="28"><Folder /></el-icon>
+            </div>
             <div class="temp-info">
               <span class="temp-label">硬盘温度</span>
-              <span class="temp-value" :class="getTempClass(temperatures.disk)">{{ formatNumber(temperatures.disk) }}°C</span>
+              <span class="temp-value" :class="getTempClass(temperatures.disk)">{{ formatTemp(temperatures.disk) }}<span v-if="isTempAvailable(temperatures.disk)" class="temp-unit">°C</span></span>
             </div>
-            <el-progress type="dashboard" :percentage="temperatures.disk" :color="getTempColor(temperatures.disk)" :width="80" />
           </div>
         </el-card>
       </el-col>
     </el-row>
     
-    <el-card class="chart-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="chart-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><TrendCharts /></el-icon>
+          <div class="card-icon-badge monitor">
+            <el-icon :size="18"><TrendCharts /></el-icon>
+          </div>
           <span>温度历史记录</span>
         </div>
       </template>
-      <div class="chart-placeholder">
-        <p>温度曲线图（待实现）</p>
-        <div class="temp-history">
-          <div v-for="(item, index) in tempHistory" :key="index" class="history-item">
-            <span class="time">{{ item.time }}</span>
-            <span class="cpu">CPU: {{ item.cpu }}°C</span>
-            <span class="gpu">GPU: {{ item.gpu }}°C</span>
-            <span class="disk">Disk: {{ item.disk }}°C</span>
-          </div>
+      <div class="temp-history">
+        <div v-for="(item, index) in tempHistory" :key="index" class="history-item">
+          <span class="time">{{ item.time }}</span>
+          <span class="cpu-temp">CPU: {{ formatTemp(item.cpu) }}</span>
+          <span class="gpu-temp">GPU: {{ formatTemp(item.gpu) }}</span>
+          <span class="disk-temp">Disk: {{ formatTemp(item.disk) }}</span>
         </div>
+        <div v-if="tempHistory.length === 0" class="history-empty">等待数据采集...</div>
       </div>
     </el-card>
   </div>
@@ -92,20 +100,17 @@ const tempHistory = ref<TempHistoryItem[]>([])
 
 let updateInterval: number | null = null
 
-const getTempColor = (temp: number) => {
-  if (temp < 60) return '#67c23a'
-  if (temp < 80) return '#e6a23c'
-  return '#f56c6c'
-}
-
 const getTempClass = (temp: number) => {
+  if (temp <= 0) return 'temp-unavailable'
   if (temp < 60) return 'temp-normal'
   if (temp < 80) return 'temp-warning'
   return 'temp-danger'
 }
 
-const formatNumber = (num: number) => {
-  return num.toFixed(2)
+const isTempAvailable = (temp: number) => temp > 0
+
+const formatTemp = (temp: number) => {
+  return isTempAvailable(temp) ? temp.toFixed(2) : 'N/A'
 }
 
 const fetchTemperatures = async () => {
@@ -113,7 +118,6 @@ const fetchTemperatures = async () => {
     const temps = await invoke<Temperatures>('get_temperatures')
     temperatures.value = temps
     
-    // 添加历史记录
     const now = new Date()
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`
     
@@ -122,7 +126,6 @@ const fetchTemperatures = async () => {
       ...temps
     })
     
-    // 保留最近20条记录
     if (tempHistory.value.length > 20) {
       tempHistory.value.pop()
     }
@@ -145,93 +148,124 @@ onUnmounted(() => {
 
 <style scoped>
 .temperature {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.temp-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .temp-content {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 10px;
+  gap: 16px;
+  padding: 16px;
 }
 
-.temp-icon {
-  font-size: 40px;
+.temp-icon-wrap {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
 }
 
-.temp-icon.cpu {
-  color: #409eff;
+.temp-icon-wrap.cpu {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
-.temp-icon.gpu {
-  color: #67c23a;
+.temp-icon-wrap.gpu {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
 }
 
-.temp-icon.disk {
-  color: #e6a23c;
+.temp-icon-wrap.disk {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
 }
 
 .temp-info {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .temp-label {
-  font-size: 14px;
-  color: #a0a0a0;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .temp-value {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.temp-unavailable {
+  color: #94a3b8;
 }
 
 .temp-normal {
-  color: #67c23a;
+  color: #22c55e;
 }
 
 .temp-warning {
-  color: #e6a23c;
+  color: #f59e0b;
 }
 
 .temp-danger {
-  color: #f56c6c;
+  color: #ef4444;
 }
 
-.chart-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.temp-unit {
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 2px;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.chart-placeholder {
-  padding: 20px;
-  text-align: center;
-  color: #a0a0a0;
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
 .temp-history {
-  margin-top: 20px;
   max-height: 300px;
   overflow-y: auto;
 }
@@ -239,24 +273,36 @@ onUnmounted(() => {
 .history-item {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #333;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+}
+
+.history-item:last-child {
+  border-bottom: none;
 }
 
 .history-item .time {
-  color: #a0a0a0;
+  color: #64748b;
   width: 80px;
 }
 
-.history-item .cpu {
-  color: #409eff;
+.history-item .cpu-temp {
+  color: #3b82f6;
 }
 
-.history-item .gpu {
-  color: #67c23a;
+.history-item .gpu-temp {
+  color: #22c55e;
 }
 
-.history-item .disk {
-  color: #e6a23c;
+.history-item .disk-temp {
+  color: #f97316;
+}
+
+.history-empty {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
 }
 </style>

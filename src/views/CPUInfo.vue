@@ -1,11 +1,18 @@
 <template>
   <div class="cpu-info">
-    <h2 class="page-title">CPU 信息</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">CPU 信息</h2>
+        <span class="page-subtitle">处理器详情与实时监控</span>
+      </div>
+    </div>
     
-    <el-card class="info-card" shadow="hover">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Cpu /></el-icon>
+          <div class="card-icon-badge cpu">
+            <el-icon :size="18"><Cpu /></el-icon>
+          </div>
           <span>处理器信息</span>
         </div>
       </template>
@@ -23,26 +30,32 @@
       </el-descriptions>
     </el-card>
     
-    <el-card class="usage-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="usage-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><TrendCharts /></el-icon>
+          <div class="card-icon-badge monitor">
+            <el-icon :size="18"><TrendCharts /></el-icon>
+          </div>
           <span>实时监控</span>
         </div>
       </template>
       <el-row :gutter="20">
         <el-col :span="12">
           <div class="monitor-item">
-            <span class="label">CPU 使用率</span>
-            <el-progress type="dashboard" :percentage="cpuInfo.usage" :color="getProgressColor(cpuInfo.usage)" />
+            <span class="monitor-label">CPU 使用率</span>
+            <el-progress type="dashboard" :percentage="cpuInfo.usage" :color="getProgressColor(cpuInfo.usage)" :width="120">
+              <template #default="{ percentage }">
+                <span class="dashboard-value">{{ formatNumber(percentage) }}%</span>
+              </template>
+            </el-progress>
           </div>
         </el-col>
         <el-col :span="12">
           <div class="monitor-item">
-            <span class="label">CPU 温度</span>
-            <el-progress type="dashboard" :percentage="cpuInfo.temperature" :color="getTempColor(cpuInfo.temperature)">
+            <span class="monitor-label">CPU 温度</span>
+            <el-progress type="dashboard" :percentage="cpuInfo.temperature" :color="getTempColor(cpuInfo.temperature)" :width="120">
               <template #default="{ percentage }">
-                <span class="percentage-value">{{ formatNumber(percentage) }}°C</span>
+                <span class="dashboard-value">{{ formatNumber(percentage) }}°C</span>
               </template>
             </el-progress>
           </div>
@@ -89,15 +102,15 @@ const cpuInfo = ref<CpuDetailedInfo>({
 let updateInterval: number | null = null
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 50) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 50) return '#3b82f6'
+  if (percentage < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const getTempColor = (temp: number) => {
-  if (temp < 60) return '#67c23a'
-  if (temp < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (temp < 60) return '#22c55e'
+  if (temp < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const formatNumber = (num: number) => {
@@ -131,56 +144,77 @@ onUnmounted(() => {
 
 <style scoped>
 .cpu-info {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.info-card, .usage-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.cpu {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.card-icon-badge.monitor {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
 }
 
 .monitor-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
+  padding: 12px 0;
 }
 
-.monitor-item .label {
+.monitor-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-value {
+  color: #1e293b;
   font-size: 16px;
-  color: #a0a0a0;
-}
-
-.percentage-value {
-  color: #e0e0e0;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-:deep(.el-descriptions) {
-  --el-descriptions-item-bordered-label-background: #2a2a2a;
-}
-
-:deep(.el-descriptions__label) {
-  color: #a0a0a0;
-}
-
-:deep(.el-descriptions__content) {
-  color: #e0e0e0;
+  font-weight: 700;
 }
 </style>

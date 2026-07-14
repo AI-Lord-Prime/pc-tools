@@ -1,19 +1,26 @@
 <template>
   <div class="disk-info">
-    <h2 class="page-title">硬盘信息</h2>
+    <div class="page-header">
+      <div class="page-title-row">
+        <h2 class="page-title">硬盘信息</h2>
+        <span class="page-subtitle">磁盘存储与健康状态</span>
+      </div>
+    </div>
     
-    <el-card class="info-card" shadow="hover">
+    <el-card class="info-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <el-icon><Folder /></el-icon>
+          <div class="card-icon-badge disk">
+            <el-icon :size="18"><Folder /></el-icon>
+          </div>
           <span>磁盘列表</span>
         </div>
       </template>
-      <el-table :data="diskList" style="width: 100%" dark>
+      <el-table :data="diskList" style="width: 100%">
         <el-table-column prop="name" label="磁盘名称" width="200" />
         <el-table-column prop="type" label="类型" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.type === 'SSD' ? 'success' : 'info'">{{ scope.row.type }}</el-tag>
+            <el-tag :type="scope.row.type === 'SSD' ? 'success' : 'info'" size="small">{{ scope.row.type }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="total" label="总容量" width="120" />
@@ -22,20 +29,25 @@
         <el-table-column prop="fileSystem" label="文件系统" width="100" />
         <el-table-column label="使用率">
           <template #default="scope">
-            <el-progress :percentage="scope.row.usage" :color="getProgressColor(scope.row.usage)" />
+            <div class="usage-bar-wrap">
+              <el-progress :percentage="scope.row.usage" :color="getProgressColor(scope.row.usage)" :stroke-width="8" :show-text="false" />
+              <span class="usage-percent">{{ scope.row.usage }}%</span>
+            </div>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
     
-    <el-card class="health-card" shadow="hover" style="margin-top: 20px;">
+    <el-card class="health-card" shadow="never" style="margin-top: 16px;">
       <template #header>
         <div class="card-header">
-          <el-icon><FirstAidKit /></el-icon>
+          <div class="card-icon-badge health">
+            <el-icon :size="18"><FirstAidKit /></el-icon>
+          </div>
           <span>磁盘健康状态</span>
         </div>
       </template>
-      <el-table :data="diskHealth" style="width: 100%" dark>
+      <el-table :data="diskHealth" style="width: 100%">
         <el-table-column prop="name" label="磁盘" width="200" />
         <el-table-column prop="temperature" label="温度" width="100">
           <template #default="scope">
@@ -44,7 +56,7 @@
         </el-table-column>
         <el-table-column prop="health" label="健康度" width="100">
           <template #default="scope">
-            <el-tag :type="getHealthType(scope.row.health)">{{ scope.row.health }}%</el-tag>
+            <el-tag :type="getHealthType(scope.row.health)" size="small">{{ scope.row.health }}%</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="readSpeed" label="读取速度" width="120" />
@@ -84,9 +96,9 @@ const diskList = ref<DiskItem[]>([])
 const diskHealth = ref<DiskHealthItem[]>([])
 
 const getProgressColor = (percentage: number) => {
-  if (percentage < 50) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 50) return '#3b82f6'
+  if (percentage < 80) return '#f59e0b'
+  return '#ef4444'
 }
 
 const getTempClass = (temp: number) => {
@@ -121,42 +133,82 @@ onMounted(() => {
 
 <style scoped>
 .disk-info {
-  color: #e0e0e0;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #409eff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
 }
 
-.info-card, .health-card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #409eff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-icon-badge {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.card-icon-badge.disk {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.card-icon-badge.health {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
 }
 
 .temp-normal {
-  color: #67c23a;
+  color: #22c55e;
 }
 
 .temp-warning {
-  color: #e6a23c;
+  color: #f59e0b;
 }
 
 .temp-danger {
-  color: #f56c6c;
+  color: #ef4444;
 }
 
-:deep(.el-progress__text) {
-  color: #e0e0e0 !important;
+.usage-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.usage-percent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
 }
 </style>
