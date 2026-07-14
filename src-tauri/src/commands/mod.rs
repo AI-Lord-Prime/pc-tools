@@ -554,6 +554,7 @@ fn get_disk_list_internal() -> Result<Vec<DiskItem>, String> {
     Ok(result)
 }
 
+#[allow(dead_code)]
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename = "Win32_DiskDrive", rename_all = "PascalCase")]
 struct Win32DiskDrive {
@@ -590,7 +591,7 @@ pub fn get_disk_health() -> Result<Vec<DiskHealthItem>, String> {
 
 #[tauri::command]
 pub fn get_system_info(state: State<'_, SystemInfoManager>) -> Result<SystemInfo, String> {
-    let sys = state.system.lock().map_err(|e| e.to_string())?;
+    let _sys = state.system.lock().map_err(|e| e.to_string())?;
     
     Ok(SystemInfo {
         os: System::name().unwrap_or_else(|| "Unknown".to_string()),
@@ -615,9 +616,10 @@ struct Win32Bios {
     manufacturer: Option<String>,
     version: Option<String>,
     release_date: Option<WMIDateTime>,
-    bios_version: Option<String>,
+    _bios_version: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename = "Win32_ComputerSystemProduct", rename_all = "PascalCase")]
 struct Win32ComputerSystemProduct {
@@ -1082,8 +1084,8 @@ pub fn scan_all() -> Result<ScanResultResponse, String> {
 struct Win32StartupCommand {
     name: Option<String>,
     command: Option<String>,
-    location: Option<String>,
-    user: Option<String>,
+    _location: Option<String>,
+    _user: Option<String>,
 }
 
 #[tauri::command]
@@ -1264,9 +1266,9 @@ pub fn run_ping(host: String) -> Result<String, String> {
 pub fn run_cpu_benchmark() -> Result<BenchmarkResult, String> {
     use std::time::Instant;
     let start = Instant::now();
-    let mut sum: f64 = 0.0;
+    let mut _sum: f64 = 0.0;
     for i in 1..=10_000_000 {
-        sum += (i as f64).sqrt();
+        _sum += (i as f64).sqrt();
     }
     let elapsed = start.elapsed().as_millis() as u64;
     let score = if elapsed > 0 { 1_000_000_000 / elapsed } else { 0 };
@@ -1281,9 +1283,9 @@ pub fn run_gpu_benchmark() -> Result<BenchmarkResult, String> {
     // GPU 真实性能测试较复杂，当前使用CPU模拟计算作为参考
     use std::time::Instant;
     let start = Instant::now();
-    let mut sum: f64 = 0.0;
+    let mut _sum: f64 = 0.0;
     for i in 1..=5_000_000 {
-        sum += (i as f64).sin() * (i as f64).cos();
+        _sum += (i as f64).sin() * (i as f64).cos();
     }
     let elapsed = start.elapsed().as_millis() as u64;
     let score = if elapsed > 0 { 500_000_000 / elapsed } else { 0 };
