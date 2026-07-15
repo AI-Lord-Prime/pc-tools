@@ -1,8 +1,8 @@
 {
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npx vite build",
-    "devPath": "http://localhost:1420",
+    "beforeDevCommand": "npm run vite",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://127.0.0.1:9666",
     "distDir": "../dist"
   },
   "package": {

@@ -18,6 +18,7 @@ impl SystemInfoManager {
 
 // CPU 信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CpuInfo {
     pub name: String,
     pub cores: usize,
@@ -25,6 +26,7 @@ pub struct CpuInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CpuDetailedInfo {
     pub name: String,
     pub vendor: String,
@@ -42,6 +44,7 @@ pub struct CpuDetailedInfo {
 
 // GPU 信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GpuInfo {
     pub name: String,
     pub memory: String,
@@ -49,6 +52,7 @@ pub struct GpuInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GpuDetailedInfo {
     pub name: String,
     pub vendor: String,
@@ -64,6 +68,7 @@ pub struct GpuDetailedInfo {
 
 // 内存信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MemoryInfo {
     pub total: String,
     pub used: String,
@@ -71,11 +76,13 @@ pub struct MemoryInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MemoryDetailedInfo {
     pub total: String,
     pub available: String,
     pub used: String,
     pub usage_percent: f32,
+    #[serde(rename = "type")]
     pub type_: String,
     pub frequency: String,
     pub slots: u32,
@@ -83,6 +90,7 @@ pub struct MemoryDetailedInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MemoryModule {
     pub slot: String,
     pub manufacturer: String,
@@ -95,6 +103,7 @@ pub struct MemoryModule {
 
 // 磁盘信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DiskInfoItem {
     pub name: String,
     pub total: String,
@@ -104,6 +113,7 @@ pub struct DiskInfoItem {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DiskItem {
     pub name: String,
     #[serde(rename = "type")]
@@ -116,6 +126,7 @@ pub struct DiskItem {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DiskHealthItem {
     pub name: String,
     pub temperature: f32,
@@ -128,6 +139,7 @@ pub struct DiskHealthItem {
 
 // 系统信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SystemInfo {
     pub os: String,
     pub version: String,
@@ -136,6 +148,7 @@ pub struct SystemInfo {
 
 // 主板信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MotherboardInfo {
     pub model: String,
     pub manufacturer: String,
@@ -146,6 +159,7 @@ pub struct MotherboardInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BiosInfo {
     pub vendor: String,
     pub version: String,
@@ -155,6 +169,7 @@ pub struct BiosInfo {
 
 // 温度信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Temperatures {
     pub cpu: f32,
     pub gpu: f32,
@@ -163,12 +178,14 @@ pub struct Temperatures {
 
 // 网络信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NetworkUsage {
     pub download: String,
     pub upload: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     pub ip: String,
     pub subnet: String,
@@ -179,6 +196,7 @@ pub struct NetworkInfo {
 
 // 风扇信息结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FanInfo {
     pub name: String,
     pub speed: u32,
@@ -188,6 +206,7 @@ pub struct FanInfo {
 
 // 启动项结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StartupItem {
     pub name: String,
     pub publisher: String,
@@ -197,6 +216,7 @@ pub struct StartupItem {
 
 // 驱动结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DriverItem {
     pub name: String,
     pub version: String,
@@ -207,6 +227,7 @@ pub struct DriverItem {
 
 // 扫描结果结构
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ScanResult {
     pub name: String,
     pub path: String,
@@ -215,6 +236,7 @@ pub struct ScanResult {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ScanResultResponse {
     pub size: String,
     pub items: Vec<ScanResult>,
@@ -222,6 +244,7 @@ pub struct ScanResultResponse {
 
 // 性能测试结果
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BenchmarkResult {
     pub score: u32,
     pub detail: String,
@@ -229,6 +252,7 @@ pub struct BenchmarkResult {
 
 // CPU 使用率
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CpuUsage {
     pub total: f32,
     pub cores: Vec<f32>,
@@ -236,6 +260,7 @@ pub struct CpuUsage {
 
 // 内存使用率
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MemoryUsage {
     pub percentage: f32,
     pub used: String,
@@ -245,6 +270,7 @@ pub struct MemoryUsage {
 
 // GPU 使用率
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GpuUsage {
     pub core: f32,
     pub memory: f32,
@@ -252,6 +278,7 @@ pub struct GpuUsage {
 
 // 应用设置
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AppSettings {
     pub auto_start: bool,
     pub minimize_to_tray: bool,

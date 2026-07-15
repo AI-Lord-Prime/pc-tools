@@ -19,6 +19,11 @@ npm run build
 npm run tauri build
 ```
 
+## 技术栈
+
+- 前端：React 18 + TypeScript + Vite + shadcn/ui + Tailwind CSS
+- 桌面：Tauri 1.x
+
 ## 其他
 
 - `npm run preview`：预览生产构建

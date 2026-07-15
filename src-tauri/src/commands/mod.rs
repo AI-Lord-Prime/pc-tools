@@ -615,8 +615,33 @@ struct Win32BaseBoard {
 struct Win32Bios {
     manufacturer: Option<String>,
     version: Option<String>,
+    #[serde(rename = "SMBIOSBIOSVersion")]
+    smbios_bios_version: Option<String>,
     release_date: Option<WMIDateTime>,
-    _bios_version: Option<String>,
+    /// WMI 中该字段是字符串数组，不能按 String 反序列化
+    #[serde(rename = "BIOSVersion", default)]
+    bios_version: Option<Vec<String>>,
+}
+
+fn resolve_bios_version(bios: &Win32Bios) -> String {
+    if let Some(v) = bios.smbios_bios_version.as_ref().filter(|s| !s.is_empty()) {
+        return v.clone();
+    }
+    if let Some(v) = bios.version.as_ref().filter(|s| !s.is_empty()) {
+        return v.clone();
+    }
+    if let Some(parts) = bios.bios_version.as_ref() {
+        let joined = parts
+            .iter()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join(" / ");
+        if !joined.is_empty() {
+            return joined;
+        }
+    }
+    "N/A".to_string()
 }
 
 #[allow(dead_code)]
@@ -649,7 +674,7 @@ fn get_motherboard_info_internal() -> Result<MotherboardInfo, String> {
     let wmi = get_wmi_connection()?;
     
     let baseboards: Vec<Win32BaseBoard> = wmi.query().map_err(|e| e.to_string())?;
-    let bioses: Vec<Win32Bios> = wmi.query().map_err(|e| e.to_string())?;
+    let bioses: Vec<Win32Bios> = wmi.query().unwrap_or_default();
     
     let baseboard = baseboards.first();
     let bios = bioses.first();
@@ -658,7 +683,7 @@ fn get_motherboard_info_internal() -> Result<MotherboardInfo, String> {
         model: baseboard.and_then(|b| b.product.clone()).unwrap_or_else(|| "Unknown".to_string()),
         manufacturer: baseboard.and_then(|b| b.manufacturer.clone()).unwrap_or_else(|| "Unknown".to_string()),
         chipset: "N/A".to_string(),
-        bios_version: bios.and_then(|b| b.version.clone()).unwrap_or_else(|| "N/A".to_string()),
+        bios_version: bios.map(resolve_bios_version).unwrap_or_else(|| "N/A".to_string()),
         bios_date: bios.and_then(|b| b.release_date.as_ref().map(|d| format_wmi_date(d))).unwrap_or_else(|| "N/A".to_string()),
         serial_number: baseboard.and_then(|b| b.serial_number.clone()).unwrap_or_else(|| "N/A".to_string()),
     })
@@ -688,7 +713,7 @@ fn get_bios_info_internal() -> Result<BiosInfo, String> {
     if let Some(bios) = bioses.first() {
         Ok(BiosInfo {
             vendor: bios.manufacturer.clone().unwrap_or_else(|| "Unknown".to_string()),
-            version: bios.version.clone().unwrap_or_else(|| "N/A".to_string()),
+            version: resolve_bios_version(bios),
             date: bios.release_date.as_ref().map(|d| format_wmi_date(d)).unwrap_or_else(|| "N/A".to_string()),
             size: "N/A".to_string(),
         })
