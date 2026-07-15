@@ -7,6 +7,7 @@
     "dev": "tauri dev",
     "vite": "vite",
     "build": "tsc --noEmit && vite build",
+    "prefetch:nsis": "powershell -ExecutionPolicy Bypass -File scripts/prefetch-nsis.ps1",
     "preview": "vite preview",
     "tauri": "tauri"
   },

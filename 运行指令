@@ -19,6 +19,14 @@ npm run build
 npm run tauri build
 ```
 
+若打包时反复下载 `nsis-3.zip`（GitHub 很慢），先预拉本地缓存：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/prefetch-nsis.ps1
+```
+
+缓存目录：`%LOCALAPPDATA%\tauri\NSIS`。缺 `nsis_tauri_utils.dll` 时 Tauri 会删掉整个 NSIS 再重下。
+
 ## 技术栈
 
 - 前端：React 18 + TypeScript + Vite + shadcn/ui + Tailwind CSS
