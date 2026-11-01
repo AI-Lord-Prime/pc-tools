@@ -1,2 +1,12 @@
 [net]
 git-fetch-with-cli = true
+
+# 使用 rsproxy 镜像加速 crates.io 下载（国内网络）
+[source.crates-io]
+replace-with = 'rsproxy-sparse'
+
+[source.rsproxy-sparse]
+registry = "sparse+https://rsproxy.cn/index/"
+
+[registries.rsproxy]
+index = "sparse+https://rsproxy.cn/index/"
